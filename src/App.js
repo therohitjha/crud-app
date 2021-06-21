@@ -1,4 +1,4 @@
-import {useState,startTransition} from 'react';
+import {useState} from 'react';
 
 export default function App(){
   const [firstCount, setFirstCount] = useState(0);
