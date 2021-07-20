@@ -39,3 +39,17 @@ input {
   width: 100%;
   justify-content: space-around;
 }
+
+
+.list{
+  padding: .5em;
+  background: white;
+}
+
+.list:nth-child(2){
+  background: #eee;
+}
+
+.list:hover{
+  background: rgb(214, 214, 214);
+}

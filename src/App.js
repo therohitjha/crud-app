@@ -73,24 +73,24 @@ export default function App() {
       <br />
       {db?.length ? (
         <table className="tableContainer">
-          <tr className="flex">
-            <th style={{ fontWeight: "700" }}>List</th>
-            <th
+          <thead className="flex" style={{padding:'.5em',background:'cyan',marginTop:'5px'}}>
+            <tr style={{ fontWeight: "700" }}>List</tr>
+            <tr
               style={{
                 color: "green",
                 fontWeight: "700",
               }}
             >
               Edit
-            </th>
-            <th style={{ color: "red", fontWeight: "700" }}>Delete</th>
-          </tr>
+            </tr>
+            <tr style={{ color: "red", fontWeight: "700" }}>Delete</tr>
+          </thead>
           {db?.map((item, i) => {
             return (
-              <tr key={item} className="flex">
+              <tr key={item} className="flex list">
                 <td>{item}</td>
                 <td
-                  style={{ cursor: "pointer", marginTop: "5px" }}
+                  style={{ cursor: "pointer"}}
                   onClick={(e) => {
                     handleEdit(item, i);
                     e.stopPropagation();
@@ -99,7 +99,7 @@ export default function App() {
                   Edit
                 </td>
                 <td
-                  style={{ cursor: "pointer", marginTop: "5px" }}
+                  style={{ cursor: "pointer"}}
                   onClick={(e) => {
                     handleDelete(i);
                     e.stopPropagation();
