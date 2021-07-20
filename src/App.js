@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 export default function App() {
@@ -7,10 +7,8 @@ export default function App() {
   const [dublicates, setDublicates] = useState(false);
   const [update, setUpdate] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
-  const focus = useRef(null);
 
   useEffect(() => {
-    focus.current.focus();
     setTimeout(() => {
       setDublicates(false);
     }, 5000);
@@ -62,7 +60,7 @@ export default function App() {
       <input
         value={data}
         onChange={(e) => setData(e.target.value)}
-        ref={focus}
+        autoFocus
       />
       {update ? (
         <button onClick={handleUpdate}>Update</button>
