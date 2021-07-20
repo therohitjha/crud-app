@@ -37,11 +37,16 @@ export default function App() {
   };
   const handleUpdate = () => {
     const item = [...db];
+    if(item.some(e=>e===data)){
+      setDublicates(true);
+    }
+    else{
     item.splice(deleteIndex, 1, data);
     setDB(item);
     setUpdate(false);
     setData("");
     setDeleteIndex(null);
+    }
   };
   const handleDelete = (i) => {
     const item = [...db];
