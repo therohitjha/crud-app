@@ -45,7 +45,7 @@ export default function App() {
     }
   };
 
-  
+
   const handleEdit = (e, i) => {
     db.forEach((item) => {
       if (item === e) {
@@ -80,8 +80,8 @@ export default function App() {
     setUpdate(false);
     setData("");
   };
-  // localStorage.clear();
-  console.log(db);
+
+  
   return (
     <div className="App">
       <h1>React CRUD Operations</h1>
