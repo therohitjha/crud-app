@@ -4,9 +4,10 @@ import "./App.css";
 export default function App() {
   const [data, setData] = useState("");
   const [db, setDB] = useState(() =>
-  JSON.parse(localStorage.getItem("db"))
-    ? JSON.parse(localStorage.getItem("db"))
-    : []);
+    JSON.parse(localStorage.getItem("db"))
+      ? JSON.parse(localStorage.getItem("db"))
+      : []
+  );
   const [dublicates, setDublicates] = useState(false);
   const [update, setUpdate] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
@@ -45,7 +46,6 @@ export default function App() {
     }
   };
 
-
   const handleEdit = (e, i) => {
     db.forEach((item) => {
       if (item === e) {
@@ -56,9 +56,8 @@ export default function App() {
     setUpdate(true);
   };
 
-
   const handleUpdate = () => {
-    const item =[...db];
+    const item = [...db];
     if (item.some((e) => e === data)) {
       setDublicates(true);
     } else {
@@ -71,6 +70,21 @@ export default function App() {
     }
   };
 
+  const handleKeyPressUpdate = (event) => {
+    if (data && event.charCode === 13) {
+      const item = [...db];
+      if (item.some((e) => e === data)) {
+        setDublicates(true);
+      } else {
+        item.splice(deleteIndex, 1, data);
+        localStorage.setItem("db", JSON.stringify(item));
+        setDB(item);
+        setUpdate(false);
+        setData("");
+        setDeleteIndex(null);
+      }
+    }
+  };
 
   const handleDelete = (i) => {
     const item = [...db];
@@ -81,7 +95,6 @@ export default function App() {
     setData("");
   };
 
-  
   return (
     <div className="App">
       <h1>React CRUD Operations</h1>
@@ -89,7 +102,7 @@ export default function App() {
         value={data}
         onChange={(e) => setData(e.target.value)}
         autoFocus
-        onKeyPress={handleEnterKeyPress}
+        onKeyPress={update ? handleKeyPressUpdate : handleEnterKeyPress}
       />
       {update ? (
         <button onClick={handleUpdate}>Update</button>
@@ -121,7 +134,7 @@ export default function App() {
             <tr style={{ color: "red", fontWeight: "700" }}>Delete</tr>
           </thead>
           {db?.length &&
-           db?.map((item, i) => {
+            db?.map((item, i) => {
               return (
                 <tr key={item} className="flex list">
                   <td>{item}</td>
