@@ -2,167 +2,145 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 export default function App() {
-  const [data, setData] = useState("");
-  const [db, setDB] = useState(() =>
-    JSON.parse(localStorage.getItem("db"))
-      ? JSON.parse(localStorage.getItem("db"))
-      : []
+  const [input, setInput] = useState("");
+  const [voices, setVoices] = useState([]);
+  const speech = new SpeechSynthesisUtterance();
+  const [pitch, setPitch] = useState(() =>
+    JSON.parse(localStorage.getItem("pitch"))
+      ? JSON.parse(localStorage.getItem("pitch"))
+      : 1
   );
-  const [dublicates, setDublicates] = useState(false);
-  const [update, setUpdate] = useState(false);
-  const [deleteIndex, setDeleteIndex] = useState(null);
+  const [rate, setRate] = useState(() =>
+    JSON.parse(localStorage.getItem("rate"))
+      ? JSON.parse(localStorage.getItem("rate"))
+      : 1
+  );
+  const [volume, setVolume] = useState(() =>
+    JSON.parse(localStorage.getItem("volume"))
+      ? JSON.parse(localStorage.getItem("volume"))
+      : 1
+  );
+  const [lang, setLang] = useState(() =>
+    JSON.parse(localStorage.getItem("lang"))
+      ? JSON.parse(localStorage.getItem("lang"))
+      : { name: "", lang: "" }
+  );
+  const [select, setSelect] = useState(lang.name && lang.lang);
 
   useEffect(() => {
-    setTimeout(() => {
-      setDublicates(false);
-    }, 5000);
-  }, [dublicates]);
-
-  const handleSubmit = () => {
-    if (data) {
-      setDB((prev) => {
-        if (prev.some((e) => e === data)) {
-          setDublicates(true);
-          return [...prev];
-        }
-        localStorage.setItem("db", JSON.stringify([...prev, data]));
-        return [...prev, data];
-      });
-      setData("");
-    }
-  };
-
-  const handleEnterKeyPress = (event) => {
-    if (data && event.charCode === 13) {
-      setDB((prev) => {
-        if (prev.some((e) => e === data)) {
-          setDublicates(true);
-          return [...prev];
-        }
-        localStorage.setItem("db", JSON.stringify([...prev, data]));
-        return [...prev, data];
-      });
-      setData("");
-    }
-  };
-
-  const handleEdit = (e, i) => {
-    db.forEach((item) => {
-      if (item === e) {
-        setData(item);
-        setDeleteIndex(i);
-      }
+    (speechSynthesis.speaking || speechSynthesis.paused) &&
+      speechSynthesis.cancel();
+    speechSynthesis.addEventListener("voiceschanged", function () {
+      setVoices(this.getVoices());
     });
-    setUpdate(true);
-  };
+  }, []);
 
-  const handleUpdate = () => {
-    const item = [...db];
-    if (item.some((e) => e === data)) {
-      setDublicates(true);
-    } else {
-      item.splice(deleteIndex, 1, data);
-      localStorage.setItem("db", JSON.stringify(item));
-      setDB(item);
-      setUpdate(false);
-      setData("");
-      setDeleteIndex(null);
-    }
-  };
+  function startSpeak() {
+    speech.text = input;
+    const temp = voices.find(
+      (e) => e.name === lang.name && e.lang === lang.lang
+    );
+    speech.rate = rate;
+    speech.pitch = pitch;
+    speech.volume = volume;
+    speech.voice = temp;
+    speechSynthesis.speak(speech);
+  }
 
-  const handleKeyPressUpdate = (event) => {
-    if (data && event.charCode === 13) {
-      const item = [...db];
-      if (item.some((e) => e === data)) {
-        setDublicates(true);
-      } else {
-        item.splice(deleteIndex, 1, data);
-        localStorage.setItem("db", JSON.stringify(item));
-        setDB(item);
-        setUpdate(false);
-        setData("");
-        setDeleteIndex(null);
-      }
-    }
-  };
+  function handleLang(event) {
+    const getLang = voices.find((e) => e.name === event.target.value);
+    localStorage.setItem(
+      "lang",
+      JSON.stringify({ name: getLang.name, lang: getLang.lang })
+    );
+    setLang({ name: getLang.name, lang: getLang.lang });
+  }
 
-  const handleDelete = (i) => {
-    const item = [...db];
-    item.splice(i, 1);
-    localStorage.setItem("db", JSON.stringify(item));
-    setDB(item);
-    setUpdate(false);
-    setData("");
-  };
+  function handlePitch(event) {
+    speechSynthesis.speaking && speechSynthesis.cancel();
+    localStorage.setItem("pitch", JSON.stringify(event.target.value));
+    setPitch(event.target.value);
+    startSpeak();
+  }
+
+  function handleRate(event) {
+    speechSynthesis.speaking && speechSynthesis.cancel();
+    localStorage.setItem("rate", JSON.stringify(event.target.value));
+    setRate(event.target.value);
+    startSpeak();
+  }
+  function handleVolume(event) {
+    speechSynthesis.speaking && speechSynthesis.cancel();
+    localStorage.setItem("volume", JSON.stringify(event.target.value));
+    setVolume(event.target.value);
+    startSpeak();
+  }
+
+  function reset() {
+    setSelect(false);
+    localStorage.clear("lang");
+    setLang({ name: "", lang: "" });
+    speechSynthesis.cancel();
+  }
+
+  console.log(speechSynthesis, lang);
 
   return (
     <div className="App">
-      <h1>React CRUD Operations</h1>
+      <select onChange={handleLang}>
+        {voices.length ? (
+          select ? (
+            <option defaultValue={lang.name}>{lang.name}</option>
+          ) : (
+            voices.map((item, index) => (
+              <option key={item.name + index} defaultValue={item.name}>
+                {item.name}
+              </option>
+            ))
+          )
+        ) : (
+          <option>Something Went Wrong!</option>
+        )}
+      </select>
       <input
-        value={data}
-        onChange={(e) => setData(e.target.value)}
-        autoFocus
-        onKeyPress={update ? handleKeyPressUpdate : handleEnterKeyPress}
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Enter Input"
       />
-      {update ? (
-        <button onClick={handleUpdate}>Update</button>
-      ) : (
-        <button onClick={handleSubmit}>Submit</button>
-      )}
-      {dublicates && (
-        <>
-          <br />
-          <span style={{ color: "red" }}>Dublicates are not allowed</span>
-        </>
-      )}
-      <br />
-      {db?.length ? (
-        <table className="tableContainer">
-          <thead
-            className="flex"
-            style={{ padding: ".5em", background: "cyan", marginTop: "5px" }}
-          >
-            <tr style={{ fontWeight: "700" }}>List</tr>
-            <tr
-              style={{
-                color: "green",
-                fontWeight: "700",
-              }}
-            >
-              Edit
-            </tr>
-            <tr style={{ color: "red", fontWeight: "700" }}>Delete</tr>
-          </thead>
-          {db?.length &&
-            db?.map((item, i) => {
-              return (
-                <tr key={item} className="flex list">
-                  <td>{item}</td>
-                  <td
-                    style={{ cursor: "pointer" }}
-                    onClick={(e) => {
-                      handleEdit(item, i);
-                      e.stopPropagation();
-                    }}
-                  >
-                    Edit
-                  </td>
-                  <td
-                    style={{ cursor: "pointer" }}
-                    onClick={(e) => {
-                      handleDelete(i);
-                      e.stopPropagation();
-                    }}
-                  >
-                    Delete
-                  </td>
-                </tr>
-              );
-            })}{" "}
-        </table>
-      ) : (
-        <div className="empty">List is Empty</div>
-      )}
+      <button onClick={startSpeak}>Speak!</button>
+      <button onClick={() => speechSynthesis.pause()}>Pause!</button>
+      <button onClick={() => speechSynthesis.resume()}>Resume!</button>
+      <button onClick={() => speechSynthesis.cancel()}>Stop!</button>
+      <button onClick={reset}>Reset Language</button>
+      <label htmlFor="pitch">Pitch</label>
+      <input
+        id={"pitch"}
+        type="range"
+        value={pitch}
+        onChange={handlePitch}
+        max={"3"}
+        step={"0.1"}
+      />
+      <label htmlFor="rate">Rate</label>
+      <input
+        id={"rate"}
+        type="range"
+        value={rate}
+        onChange={handleRate}
+        max={"2"}
+        step={"0.1"}
+      />
+      <label htmlFor="volume">Volume</label>
+      <input
+        id={"volume"}
+        type="range"
+        value={volume}
+        onChange={handleVolume}
+        max={"1"}
+        min={"0"}
+        step={"0.1"}
+      />
     </div>
   );
 }
